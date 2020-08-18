@@ -1,0 +1,525 @@
+<html>
+    <br>
+    <br>
+    <br>
+<br>
+<br>
+<div style="text-align: center;">
+<div id="page2">
+</div>
+<textarea id="output" name="textarea" style="color: green; height: 500px; width: 900px;
+font-family:'Courier New';font-size:18px"></textarea><br />
+<textarea id="input" style="color: purple; height: 100px; width: 900px;
+font-family:'Courier New';font-size:18px">Javascript Code goes here !</textarea><br />
+<input id="enter" onclick="doo()" style="color: purple;" type="button" value=">>" /> 
+<script>
+
+
+
+
+
+ var output = "";
+ var memory = [];
+ var pointer = 0;
+ 
+out('Welcome to Inverted G3i Proof Assistant v0.1\n\nCommands:\n\nNew(<sequent>) Ex: New("|- (A -> (A v B))")\n<Rule>(<sequentnumber> [,<formulanumber>])\nShowState()\nShowProofSequence()\nUndoLast()\n');
+out("\n(Inverted) Rules are: rand, rorl, rorr, rimp, ax, abs, land, lor, limp\n")
+document.getElementById("input").value ="";
+    
+function doo(){
+    
+var input = document.getElementById("input").value;
+
+if(input.slice(0,7)=="clear()"){
+    doo2(); 
+    memory.push(input.slice(0,input.length-1));
+  document.getElementById("input").value=""; return ;}
+
+memory.push(input.slice(0,input.length-1));
+try{var aux = eval(input)}catch(err){out("\n"+ err.message);return}
+
+if(aux!=undefined){
+out("\n>> "+ input + "\n"+aux+"\n\n"); }
+   
+
+     document.getElementById("input").value="" }
+   
+document.getElementById("enter").style.display="none" 
+
+  
+var input = document.getElementById("input");
+ input.addEventListener("keyup", function(event) {
+   if (event.keyCode === 13) {
+   event.preventDefault()
+   document.getElementById("enter").click()}
+ if (event.keyCode === 38 && pointer < memory.length) {
+   event.preventDefault();
+   document.getElementById("input").value = memory[memory.length -1 - pointer];
+   pointer = pointer + 1;}
+ 
+  if (event.keyCode === 40 && pointer > 0) {
+   event.preventDefault();
+   pointer = pointer -1 ;
+   document.getElementById("input").value = memory[memory.length - 1 - pointer];
+   }}) 
+   
+   
+  function doo2(){ output = ""; out(""); }
+  
+ function out(s){
+     output = output + s;
+     document.getElementById("output").value = output;
+     
+     document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
+     document.getElementById("input").focus();
+     
+     
+     
+ }
+
+
+
+
+
+function goto(link){
+
+     var con = new XMLHttpRequest();
+     con.onreadystatechange = function() {
+         if (this.readyState == 4 && this.status == 200) {
+       
+            document.getElementById("page2").innerHTML = con.responseText;
+         }
+     };
+     
+     
+     
+     con.open("GET",link,false);
+     con.send()}
+     
+
+
+
+     var SpaceParenthesis = function spaceparenthesis(form){
+       if(form == undefined || form ==""){return ""}
+        if(["(",")",",","&","V",";"].includes(form[0])){
+       return " "+form[0]+" "+ spaceparenthesis(form.slice(1,))
+       }else{return form[0]+spaceparenthesis(form.slice(1,)) } }
+      var Imps = function imps(form){
+        if(form == undefined || form ==""){return ""}
+        if( ["->","<-","-<",">-","|-",">>"].includes(form.slice(0,2)) ){
+       return " "+form.slice(0,2)+" "+ imps(form.slice(2,))
+       }else{return form[0]+imps(form.slice(1,)) }}
+
+     var Clean = function clean(form){
+     var aux = function(form){
+       if(form[0]==" "){return form.slice(1,)}
+       if(form[form.length -1]==" "){return form.slice(0,form.length-1) }
+       for( var i = 0; i < form.length-1; i++){
+       if(form.slice(i,i+2) == "  "){return form.slice(0,i) + form.slice(i+1,) }
+       } return form}
+       while(aux(form)!= form) {form = aux(form)}return form}
+       var Fix = function(form){return Clean(Imps(SpaceParenthesis(form))) }
+
+
+       function LowerCase(str) {
+           var code, i, len;
+        for (i = 0, len = str.length; i < len; i++) {
+             code = str.charCodeAt(i);
+             if (!(code > 96 && code < 123))  {  return false;
+             }}  return true;}
+
+       function UpperCase(str) {
+           var code, i, len;
+        for (i = 0, len = str.length; i < len; i++) {
+             code = str.charCodeAt(i);
+             if (!(code > 64 && code < 91)){ return false;}
+           }    return true;}
+
+
+      // dic["f"] = [ arity, order type list]
+      var ArityCheck = function aritycheck(ast, dic){
+       if(ast[0]=="PropVar"){return true}
+       if(ast[0]=="Operation" && dic[ast[1]][0]!=ast[2].length ){return false} 
+       if(ast[0]=="StrucOp" && dic[ast[1]][0]!=ast[2].length ){return false} 
+       for(var j = 0; j < ast[2].length; j++){
+         if(!aritycheck(ast[2][j])){return false} }  return true } 
+ 
+     function BinaryNode(kind,connective, left,right){
+         this.category ="BinaryNode"
+         this.kind = kind
+         this.operation = connective
+         this.leftchild = left
+         this.rightchild = right
+         this.sign = ""
+         this.type = ""}  
+
+     function OperatorNode(kind,operation,children){
+         this.category ="OperatorNode"
+         this.kind = kind
+         this.operation = operation
+         this.children = children 
+         this.sign = ""
+         this.type = ""}
+
+     function Leaf(kind,atom){
+         this.category="Leaf"
+         this.kind = kind
+         this.atom = atom
+         this.operation =""
+         this.sign = ""}  
+    
+     function Sequent(precedent, succedent){
+      this.category="Sequent"
+      this.precedent = precedent
+      this.succedent = succedent
+      this.kind =""  }
+ 
+ 
+     var Binary = function binary(parser, separator, name){
+      var aux = function(exp){
+       if(exp.length <5){return undefined}
+         for(var i = 2; i < exp.length -2; i++){
+          if(exp[0]=="(" && exp[exp.length-1]==")" &&
+           separator.includes(exp[i])   && parser(exp.slice(1,i))!=undefined  && parser(exp.slice(i+1,exp.length-1))!=undefined ){
+            var out = new BinaryNode(name, exp[i], parser(exp.slice(1,i)), parser(exp.slice(i+1,exp.length-1)))
+            return out
+          }} return undefined}
+          return aux}  
+     
+        
+      var Unary = function unary(operatorlist,parser,name){
+       if(parser==undefined){return undefined}
+       var out = function (exp){
+        if(exp.length < 2){return undefined}
+        if(operatorlist.includes(exp[0]) && parser(exp.slice(1,exp.length))!=undefined ){
+        return  new OperatorNode(name, exp[0], [parser(exp.slice(1,exp.length))]) } return undefined }
+        return out }         
+        
+      var Star = function  star(parser,separator){
+      var out = function(exp){
+           if(parser(exp)!= undefined){return [parser(exp)]}
+           if(exp.length < 3){return undefined}
+           for(var i = 1; i < exp.length -1 ; i++){
+            if(parser(exp.slice(0,i))!=undefined  && separator.includes(exp[i]) && star(parser,separator)(exp.slice(i+1,))!=undefined){
+             return [ parser(exp.slice(0,i))].concat(star(parser,separator)(exp.slice(i+1,)) ) } }  return undefined }
+             return out}
+                
+     var Op = function op(parser, operator, name, ssep){
+       var aux = function(exp){
+       if (exp.length < 4){return undefined}
+       if(operator.includes(exp[0]) && exp[1]=="(" && exp[exp.length-1]==")" && Star(parser,ssep)(exp.slice(2,exp.length-1))!=undefined )
+       {var out = new OperatorNode(name, exp[0], Star(parser,ssep)(exp.slice(2,exp.length-1)))
+        return out } return undefined}
+        return aux}
+
+     var Or = function orparse(parserlist,exp){
+      for(var i = 0; i < parserlist.length; i++){
+       if(parserlist[i](exp)!=undefined){return parserlist[i](exp)} }
+         return undefined}
+  
+     function AtomParse(name,list){
+      var out = function(exp){
+      if(exp.length == 1 & list.includes(exp[0])){ return new Leaf(name,exp[0])  }      
+      return undefined }
+      return out  }
+ 
+
+      function BooleanParse(name,booleanfunction){
+  
+       var out = function(exp){
+       if(exp.length == 1 && booleanfunction(exp[0]) ){ return new Leaf(name,exp[0])  }      
+       return undefined }
+       return out } 
+ 
+
+     // Examples
+       
+     // function Form(exp){return Or([AtomParse("PropVar",["p","q","r","s"]), Binary(Form,["&","V","->","<-","-<",">-"],"formula"), 
+     // Op(Form, ["f","g","h"],"formula", [","])]  ,exp)}
+ 
+     // function Struc(exp){return Or([Form, Op(Struc, ["F","G","H"],"structure", [","]), Binary(Struc,[";",">>"],"structure")] ,exp )}  
+ 
+     
+     var tokenize = function tok(exp){return Fix(exp).split(" ")} 
+     //var Seq = function seq(exp){return Sequent(tokenize(exp)) }
+ 
+      // Display calculus for lattice logic
+
+     //function  A(exp){return Or( [AtomParse("PropVarL",["p","r","q","s"]), Unary(["blackdiamond"], Alpha,"Lform"), Unary(["blackbox"], Ksi,"Lform")] , exp )}
+     //function X(exp){return  Or([AtomParse("PropVarL", ["p","r","q","s"]), AtomParse("Lstruc", ["I"]),Unary(["blackdot"],Gamma,"Lstruc"), Unary(["blackdotop"],Pi,"Lstruc")],exp )}
+     //var Alpha =  Unary(["whitebox"],A,"Pform")
+     //var Ksi =  Unary(["whitediamondop"],A,"Popform")
+     //function Gamma(exp){ return Or([ Unary(["whitecircle"],X ,"Pstruc" ), AtomParse("Pstruc", ["Scircle"]), Binary(Gamma,[".","->"],"Pstruc")  ],exp)}
+     //function Pi(exp){ return Or([ Unary(["whitecircleop"],X ,"Popstruc" ), AtomParse("Popstruc", ["Scircleop"]), Binary(Gamma,[".","->"],"Popstruc")  ],exp)}
+
+  
+     // Further functions
+ 
+     var Printout = function printout (ast){
+      if(ast.length==0){return ""}
+      if(ast==undefined){return ""}
+      if(ast.category=="Leaf"){return ast.atom }
+      if(ast.category=="BinaryNode"){return "(" + printout(ast.leftchild) + " "+ ast.operation + " " + printout(ast.rightchild) +")"}
+      if(ast.category=="OperatorNode"){return ast.operation +"(" + (ast.children.map((x) => printout(x)) ).join(",") +")" }
+       if(ast.category="Sequent"){return (ast.precedent.map( (x)=> printout(x) )).join(",") + " |- " + printout(ast.succedent) }}
+ 
+      function MultSub(old,fresh,places,form){
+      var spli = form.split(old)
+      var size = spli.length
+      var trans = {}
+      for(var i = 0; i< size; i++){
+      if(places.includes(i+1)){trans[i]=fresh}else{trans[i]=old} }
+      var out = [] 
+      for(var i = 0; i < spli.length-1; i++){
+      out.push(spli[i]+ trans[i]) }
+      out.push(spli[size-1])
+      return out.join("") }   
+
+      function Form(exp){return Or([BooleanParse("Atom",UpperCase), AtomParse("Atom",["_|_"]), Binary(Form,["&","v","->"],""), ]  ,exp)}
+      
+      function Struc(exp){return Star(Form,[","])(exp) }
+      
+  var Seq = function seq(exp){
+        if(exp.length < 2){return []}
+        if(exp[0]=="|-" && Form(exp.slice(1,))!=undefined ){return new Sequent([],Form(exp.slice(1,))) }
+        for(var i = 1; i < exp.length-1; i++){
+        if(exp[i]=="|-" && Struc(exp.slice(0,i))!=undefined && Form(exp.slice(i+1,))!=undefined ){
+        return new Sequent(Struc(exp.slice(0,i))  , Form(exp.slice(i+1,)) ) }}  return undefined } 
+    
+      
+ function RAnd(seq,position){
+        if( seq.succedent.operation=="&"){
+        return [new Sequent(seq.precedent, seq.succedent.leftchild), new Sequent(seq.precedent, seq.succedent.rightchild)] } return undefined}
+ 
+ RAnd.prototype.name ="RAnd"
+             
+ function ROrR(seq,position){
+         if( seq.succedent.operation=="v"){
+          return [new Sequent(seq.precedent, seq.succedent.rightchild)] } return undefined}
+ 
+ ROrR.prototype.name ="ROrR"     
+      
+ function ROrL(seq,position){
+           if( seq.succedent.operation=="v"){
+            return [new Sequent(seq.precedent, seq.succedent.leftchild) ]} return undefined}
+  
+ ROrL.prototype.name ="ROrL"     
+      
+ function RImp(seq,position){
+                if( seq.succedent.operation=="->"){
+                 
+                 if(seq.precedent.length > 0){
+                  var aux = Struc(tokenize(seq.precedent.map((x) => Printout(x)).join(",") +"," + Printout(seq.succedent.leftchild)))}
+                  else{ var aux = [seq.succedent.leftchild]   }
+                   return [new Sequent( aux, seq.succedent.rightchild) ] } return undefined}
+      
+RImp.prototype.name ="RImp"  
+         
+ function Ax(seq,position){
+                if( Printout(seq.precedent[position])==Printout(seq.succedent) ){
+                     return []} return undefined}
+      
+Ax.prototype.name ="Ax"      
+      
+function Abs(seq,position){
+              if( Printout(seq.precedent[position])=="_|_" ){
+                return []} return undefined}
+                  
+Abs.prototype.name ="Abs"
+                                                       
+function LAnd(seq,position){
+       
+ if( seq.precedent[position].operation=="&"){
+  var insert = Struc(tokenize(Printout(seq.precedent[position].leftchild) + ","  + Printout(seq.precedent[position].rightchild)))
+   var aux = ((seq.precedent.slice(0,position)).concat(insert)).concat(seq.precedent.slice(position+1,))
+  return [new Sequent(aux, seq.succedent)] } return undefined}
+
+LAnd.prototype.name ="LAnd"
+
+ function LOr(seq,position){
+   if( seq.precedent[position].operation=="v"){
+      var right = Seq(tokenize(Printout(seq)))
+      right.precedent[position]= seq.precedent[position].rightchild
+     var left = Seq(tokenize(Printout(seq)))
+      left.precedent[position]= seq.precedent[position].leftchild
+    return [left,right] } return undefined}
+    
+ LOr.prototype.name ="LOr" 
+  
+function LImp(seq,position){
+      if( seq.precedent[position].operation=="->"){
+         var right = Seq(tokenize(Printout(seq)))
+         right.precedent[position]= seq.precedent[position].rightchild
+        var left = Seq(tokenize(Printout(seq)))
+       left.succedent = seq.precedent[position].leftchild
+       return [left,right] } return undefined}
+          
+  LImp.prototype.name="LImp"
+     
+
+function Rule(name,seq,position,form,){
+       this.name = name
+        this.sequent = seq
+ this.position = position 
+ this.form = form}
+
+ function Remove(state,seq){
+  
+ var aux = []
+  for(var s of state){
+   
+   if(Printout(s)!=Printout(seq)){aux.push(s)} 
+ }  return aux }
+
+
+ function ProofEnvironment(name,state){
+       
+       this.state = state
+      
+       this.name = name
+      // history - list of previous states
+       this.history = []  
+       //  list of (inverse) rules that have been applied, each rule will be an object with a name
+       this.proof = []   
+  
+       this.applyrule = function (rulefunction, seq, position){
+       if(seq > this.state.length -1){return undefined}
+       if(position > this.state[seq].precedent.length -1 ){return undefined} 
+       
+       var aux = this.state[seq]
+       
+       var aux2 = rulefunction(aux,position)
+       if(aux2==undefined){return undefined}
+       
+       this.proof.push(new Rule(rulefunction.prototype.name,seq,position,this.state[seq]) ) 
+       
+       var aux3 = this.state.slice(0,)
+       this.history.push(aux3) 
+       
+       this.state = Remove( this.state , aux)
+       var aux4 = this.state.concat(aux2) 
+       this.state = aux4
+       return 0
+      }
+       this.display = function(){
+        
+        if(this.state.length==0){out("\n Q.E.D.")
+        out("\n")
+       ShowProofSequence()
+       } 
+        var i = 1
+        for(var sq of this.state){
+         out("\n("+i+") " + Printout(sq)) 
+         i++}
+         out("\n") 
+        
+      }
+      
+      // undo last move
+      // showproof
+      
+      } 
+ 
+      var proof;
+ 
+ function New(string){
+       
+  proof = new ProofEnvironment("myproof",[Seq(tokenize(string))]) 
+  ShowState()   
+      }
+ function rand(seq){
+  if(proof.applyrule(RAnd,seq-1,-1)!=undefined)
+   {ShowState()}
+ }    
+  
+  function rorl(seq){
+   if(proof.applyrule(ROrL,seq-1, -1)!=undefined)
+    {ShowState()}
+  } 
+   
+   function rorr(seq){
+    if(proof.applyrule(ROrR,seq-1,-1)!=undefined)
+     {ShowState()}
+   } 
+  
+  function rimp(seq){
+   if(proof.applyrule(RImp,seq-1,-1)!=undefined)
+    {ShowState()}
+  } 
+  
+  function ax(seq,pos){
+   if(proof.applyrule(Ax,seq-1,pos-1)!=undefined)
+    {ShowState()}
+  }
+  
+  
+   function abs(seq,pos){
+    if(proof.applyrule(Abs,seq-1,pos-1)!=undefined)
+     {ShowState()}
+   }
+  
+   function land(seq,pos){
+    if(proof.applyrule(LAnd,seq-1,pos-1)!=undefined)
+     {ShowState()}
+   }
+  
+  function lor(seq,pos){
+   if(proof.applyrule(LOr,seq-1,pos-1)!=undefined)
+    {ShowState()}
+  }
+   
+  function limp(seq,pos){
+   if(proof.applyrule(LImp,seq-1,pos-1))
+    {ShowState()}
+  } 
+                 
+ function ShowState(){proof.display()}
+            
+ function ShowProofSequence(){
+  out("\n")
+  
+  for(var a of proof.proof){
+   if(a.position==-1 && a.name !="Ax" && a.name!="Abs"){ 
+    out(a.name + (a.sequent+1).toString()+ " => ")}
+     
+    if(a.position!=-1 && a.name !="Ax" && a.name!="Abs"){
+     out(a.name + (a.sequent+1).toString() +","+ (a.position +1).toString()+ " = >" )}
+     
+     if(a.name =="Ax" || a.name=="Abs" )
+   { out(a.name + (a.sequent+1).toString() + ","+ (a.position+1).toString() + " "+ Printout(a.form) + " => ")} 
+    } 
+   
+    if(proof.state.length==0){out("Q.E.D.")}  
+   
+   }
+  
+ function UndoLast(){
+ var aux = proof.history[proof.history.length -1]
+  proof.history.pop()
+  proof.proof.pop()
+ proof.state = aux 
+  ShowState()}  
+      
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+
+        
+</script>
+
+     
+
+</div>
+</html>
